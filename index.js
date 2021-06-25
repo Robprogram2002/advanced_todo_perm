@@ -1,20 +1,17 @@
 const express = require('express');
-
-const app = express();
 const cors = require('cors');
+const dotenv = require('dotenv');
 
 const { sequelize } = require('./models');
-
 const authRoutes = require('./routes/authRoutes');
+
+const app = express();
+dotenv.config();
 
 app.use(express.json());
 app.use(cors());
 
-app.use('/auth', authRoutes);
-
-app.get('/test', (req, res) => {
-  res.send('<h1> Hello from the server </h1>');
-});
+app.use(authRoutes);
 
 const main = async () => {
   await app.listen(process.env.PORT || 5000);
