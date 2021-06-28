@@ -7,8 +7,16 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate({ User }) {
-      this.belongsTo(User);
+    static associate({ User, Section, Task }) {
+      this.belongsTo(User, { foreignKey: 'userId', as: 'creator' });
+      this.hasMany(Section, { foreignKey: 'proyectId' });
+      this.hasMany(Task, {
+        foreignKey: 'entityId',
+        constraints: false,
+        scope: {
+          entityType: 'Proyect',
+        },
+      });
     }
   }
   Proyect.init(
@@ -20,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         required: true,
       },
-      titulo: {
+      title: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
@@ -34,13 +42,29 @@ module.exports = (sequelize, DataTypes) => {
       },
       color: {
         type: DataTypes.STRING,
-        values: ['azul', 'anaranjado', 'rojo', 'verde', 'rosado', 'morado'],
+        values: [
+          'red',
+          'blue',
+          'light-blue',
+          'green',
+          'light-green',
+          'yellow',
+          'orange',
+          'brown',
+          'purpple',
+          'pink',
+          'violete',
+          'gray',
+          'cyan',
+          'crimson',
+        ],
       },
       userId: {
         type: DataTypes.UUID,
         allowNull: false,
       },
     },
+
     {
       sequelize,
       modelName: 'Proyect',

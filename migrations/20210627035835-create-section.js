@@ -1,6 +1,6 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('proyects', {
+    await queryInterface.createTable('sections', {
       uuid: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -8,23 +8,23 @@ module.exports = {
         primaryKey: true,
         required: true,
       },
-      titulo: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
         validate: {
           min: 3,
+          max: 100,
         },
-        required: true,
       },
-      description: {
-        type: Sequelize.TEXT,
-        allowNull: true,
+      order: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        validate: {
+          isInt: 'enter a valid integer',
+          min: 0,
+        },
       },
-      color: {
-        type: Sequelize.STRING,
-        values: ['azul', 'anaranjado', 'rojo', 'verde', 'rosado', 'morado'],
-      },
-      userId: {
+      proyectId: {
         type: Sequelize.UUID,
         allowNull: false,
       },
@@ -39,6 +39,6 @@ module.exports = {
     });
   },
   down: async (queryInterface) => {
-    await queryInterface.dropTable('proyects');
+    await queryInterface.dropTable('sections');
   },
 };

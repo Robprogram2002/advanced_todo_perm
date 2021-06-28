@@ -24,7 +24,7 @@ router.post(
   ],
   signUpHanlder,
 );
-router.get('/signin', [emailValidator, passwordValidator], signInHandler);
+router.post('/signin', [emailValidator, passwordValidator], signInHandler);
 
 router.get('/me', isAuth, meHandler);
 

@@ -3,10 +3,9 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate({ Proyect }) {
-      this.hasOne(Proyect, {
+      this.hasMany(Proyect, {
         onDelete: 'CASCADE',
         foreignKey: 'userId',
-        as: 'creator',
       });
     }
   }
