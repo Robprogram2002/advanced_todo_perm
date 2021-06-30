@@ -24,7 +24,7 @@ exports.createPost = async (req, res) => {
 
     res.status(200).json({
       message: 'post created successfully',
-      proyect: newProyect.toJSON(),
+      proyect: { ...newProyect.toJSON(), Tasks: [], Sections: [] },
     });
   } catch (error) {
     fordwarErrors(error);
@@ -69,7 +69,7 @@ exports.getProyect = async (req, res) => {
       error.statusCode = 404;
       throw error;
     }
-
+    console.log(proyect);
     res.status(200).json({ proyect });
   } catch (error) {
     fordwarErrors(error);

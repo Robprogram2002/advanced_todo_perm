@@ -1,7 +1,7 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { User, Proyect } = require('../models');
 const fordwarErrors = require('../utils/forwarError');
 
 exports.signUpHanlder = async (req, res) => {
@@ -52,7 +52,10 @@ exports.signInHandler = async (req, res) => {
 
     const { email, password } = req.body;
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({
+      where: { email },
+      include: [{ model: Proyect, attributes: ['title', 'uuid', 'color'] }],
+    });
 
     if (!user) {
       const error = new Error('No user found with this credentials');
@@ -77,12 +80,12 @@ exports.signInHandler = async (req, res) => {
       process.env.TOKEN_SECRET,
       { expiresIn: process.env.TOKEN_EXP },
     );
-    const hourMiliSeconds = (60 * 60) * 1000;
-
+    const hourMiliSeconds = 60 * 60 * 1000;
     res.status(200).json({
       expirationTime: new Date(new Date().getTime() + hourMiliSeconds),
       token,
       user: user.toJSON(),
+      proyects: user.Proyects,
     });
   } catch (error) {
     fordwarErrors(error, res);
@@ -93,7 +96,9 @@ exports.meHandler = async (req, res) => {
   const { userId } = req;
 
   try {
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      include: [{ model: Proyect, attributes: ['title', 'uuid', 'color'] }],
+    });
 
     if (!user) {
       const error = new Error('Not user authenticated');
@@ -101,7 +106,10 @@ exports.meHandler = async (req, res) => {
       throw error;
     }
 
-    res.json({ user: user.toJSON() });
+    res.json({
+      user: user.toJSON(),
+      proyects: user.Proyects,
+    });
   } catch (error) {
     fordwarErrors(error);
   }
