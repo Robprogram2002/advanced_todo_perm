@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator');
-
+const { Op } = require('sequelize');
 const { Task, Proyect, Section } = require('../models');
 const fordwarErrors = require('../utils/forwarError');
 
@@ -55,6 +55,61 @@ exports.getTask = async (req, res) => {
     }
 
     res.status(200).json({ task });
+  } catch (error) {
+    fordwarErrors(error);
+  }
+};
+
+exports.reOrderTasks = async (req, res) => {
+  const { taskId, entityId, entityType } = req.body;
+  let { actualPosition, newPosition } = req.body;
+  actualPosition = +actualPosition;
+  newPosition = +newPosition;
+
+  const condition = { entityId, entityType };
+
+  try {
+    const taskAmount = await Task.count({ where: condition });
+
+    if (newPosition > taskAmount || newPosition < 0) {
+      const error = new Error('Bad position');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (newPosition > actualPosition) {
+      const tasks = await Task.findAll({
+        where: {
+          ...condition,
+          order: {
+            [Op.gt]: actualPosition,
+            [Op.lte]: newPosition,
+          },
+        },
+      });
+
+      tasks.forEach(async (task) => {
+        await task.update({ order: task.order - 1 });
+      });
+    } else {
+      const tasks = await Task.findAll({
+        where: {
+          ...condition,
+          order: {
+            [Op.gte]: newPosition,
+            [Op.lt]: actualPosition,
+          },
+        },
+      });
+
+      tasks.forEach(async (task) => {
+        await task.update({ order: task.order + 1 });
+      });
+    }
+
+    await Task.update({ order: newPosition }, { where: { uuid: taskId } });
+
+    res.status(200).json({ message: 'order changed' });
   } catch (error) {
     fordwarErrors(error);
   }

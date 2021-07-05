@@ -1,7 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const isAuth = require('../middleware/is-auth');
-const { createTask, getTask } = require('../controllers/taskController');
+const { createTask, getTask, reOrderTasks } = require('../controllers/taskController');
 
 const router = express.Router();
 
@@ -10,5 +10,6 @@ const taskNameValidator = [body('name').isString().trim().isLength({ min: 2, max
 
 router.post('/create', taskNameValidator, isAuth, createTask);
 router.get('/:taskId', isAuth, getTask);
+router.patch('/re-order', isAuth, reOrderTasks);
 
 module.exports = router;

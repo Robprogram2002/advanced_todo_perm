@@ -31,7 +31,7 @@ exports.createSection = async (req, res) => {
       proyectId,
     });
 
-    res.status(200).json({ section: newSection });
+    res.status(200).json({ section: { ...newSection.toJSON(), Tasks: [] } });
   } catch (error) {
     fordwarErrors(error);
   }

@@ -59,9 +59,39 @@ exports.getProyect = async (req, res) => {
 
   try {
     const proyect = await Proyect.findByPk(proyectId, {
-      include: [{
-        model: Section, include: [Task],
-      }, Task],
+      include: [
+        {
+          model: Section,
+          include: [
+            {
+              model: Task,
+              separate: true,
+              order: [['order', 'ASC']],
+              include: [
+                {
+                  model: Task,
+                  separate: true,
+                  order: [['order', 'ASC']],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          model: Task,
+          include: [
+            {
+              model: Task,
+              separate: true,
+              order: [['order', 'ASC']],
+            },
+          ],
+        },
+      ],
+      order: [
+        [{ model: Section }, 'order', 'ASC'],
+        [{ model: Task }, 'order', 'ASC'],
+      ],
     });
 
     if (proyect.userId !== req.userId) {
@@ -69,7 +99,7 @@ exports.getProyect = async (req, res) => {
       error.statusCode = 404;
       throw error;
     }
-    console.log(proyect);
+    console.log(proyect.toJSON());
     res.status(200).json({ proyect });
   } catch (error) {
     fordwarErrors(error);
