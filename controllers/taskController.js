@@ -14,6 +14,7 @@ exports.createTask = async (req, res) => {
     }
 
     const { name, entityType, entityId } = req.body;
+
     const taskAmount = await Task.count({ where: { entityType, entityId } });
 
     const taskData = {
@@ -35,8 +36,7 @@ exports.createTask = async (req, res) => {
       const task = await Task.findByPk(entityId);
       result = await task.createTask(taskData);
     }
-
-    res.status(200).json({ result });
+    res.status(200).json({ result: { ...result.toJSON(), Tasks: [] } });
   } catch (error) {
     fordwarErrors(error);
   }
@@ -46,7 +46,26 @@ exports.getTask = async (req, res) => {
   const { taskId } = req.params;
 
   try {
-    const task = await Task.findByPk(taskId, { include: [Task] });
+    const task = await Task.findByPk(taskId, {
+      include: [
+        {
+          model: Task,
+          separate: true,
+          order: [['order', 'ASC']],
+          include: [
+            {
+              model: Task,
+              separate: true,
+              order: [['order', 'ASC']],
+            },
+          ],
+        },
+        {
+          model: Proyect,
+          attributes: ['title', 'uuid', 'color'],
+        },
+      ],
+    });
 
     if (!task) {
       const error = new Error('Not task found');
@@ -110,6 +129,28 @@ exports.reOrderTasks = async (req, res) => {
     await Task.update({ order: newPosition }, { where: { uuid: taskId } });
 
     res.status(200).json({ message: 'order changed' });
+  } catch (error) {
+    fordwarErrors(error);
+  }
+};
+
+exports.updateTask = async (req, res) => {
+  const { errors } = validationResult(req);
+  try {
+    if (errors.length > 0) {
+      const error = new Error('Validation Failed');
+      error.statusCode = 400;
+      error.data = errors;
+      throw error;
+    }
+
+    const { name } = req.body;
+    const { taskId } = req.params;
+
+    const task = await Task.findByPk(taskId);
+    await task.update({ name });
+
+    res.status(200).json({ newTaskName: name });
   } catch (error) {
     fordwarErrors(error);
   }

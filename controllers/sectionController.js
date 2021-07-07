@@ -12,7 +12,7 @@ exports.createSection = async (req, res) => {
       error.data = errors;
       throw error;
     }
-    const { name } = req.body;
+    const { name, position } = req.body;
     const { proyectId } = req.params;
 
     const proyect = await Proyect.findByPk(proyectId);
@@ -23,11 +23,22 @@ exports.createSection = async (req, res) => {
       throw error;
     }
 
-    const orderCount = await Section.count({ where: { proyectId } });
+    const sections = await Section.findAll({
+      where: {
+        proyectId,
+        order: {
+          [Op.gte]: position,
+        },
+      },
+    });
+
+    sections.forEach(async (section) => {
+      await section.update({ order: section.order + 1 });
+    });
 
     const newSection = await Section.create({
       name,
-      order: orderCount,
+      order: position,
       proyectId,
     });
 

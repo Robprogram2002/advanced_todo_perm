@@ -72,6 +72,13 @@ exports.getProyect = async (req, res) => {
                   model: Task,
                   separate: true,
                   order: [['order', 'ASC']],
+                  include: [
+                    {
+                      model: Task,
+                      separate: true,
+                      order: [['order', 'ASC']],
+                    },
+                  ],
                 },
               ],
             },
@@ -84,6 +91,13 @@ exports.getProyect = async (req, res) => {
               model: Task,
               separate: true,
               order: [['order', 'ASC']],
+              include: [
+                {
+                  model: Task,
+                  separate: true,
+                  order: [['order', 'ASC']],
+                },
+              ],
             },
           ],
         },
@@ -99,7 +113,6 @@ exports.getProyect = async (req, res) => {
       error.statusCode = 404;
       throw error;
     }
-    console.log(proyect.toJSON());
     res.status(200).json({ proyect });
   } catch (error) {
     fordwarErrors(error);
